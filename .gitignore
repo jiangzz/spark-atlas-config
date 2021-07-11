@@ -1,0 +1,3 @@
+# Project exclude paths
+/spark-atlas-hook/target/
+/spark-sql/target/
