@@ -11,3 +11,4 @@ atlas.kafka.bootstrap.servers=CentOS:9092
 ```shell
 [root@CentOS spark-2.4.5]# ./bin/spark-submit  --master yarn  --deploy-mode  cluster  --class com.jd.SparkSQLApplication  --conf spark.sql.queryExecutionListeners=com.jd.AtlasSparkSQLTracker  --conf spark.sql.extensions=com.jd.AtlasSparkSessionExtensions  --jars /root/spark-atlas-hook-1.0-SNAPSHOT.jar --files file:///root/spark-hook.properties  /root/spark-sql-1.0-SNAPSHOT.jar 
 ```
+> 支持将配置文件和jars直接放置在HDFS文件系统中
