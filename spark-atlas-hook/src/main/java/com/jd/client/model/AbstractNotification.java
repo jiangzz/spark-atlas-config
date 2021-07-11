@@ -1,8 +1,7 @@
-package com.jd.client;
+package com.jd.client.model;
 
-import org.apache.atlas.model.notification.AtlasNotificationStringMessage;
-import org.apache.atlas.model.notification.MessageVersion;
-import org.apache.atlas.notification.NotificationException;
+import com.jd.client.NotificationInterface;
+import com.jd.client.exception.NotificationException;
 import org.apache.atlas.type.AtlasType;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,10 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.atlas.model.notification.AtlasNotificationBaseMessage.CompressionKind;
 
-import static com.jd.client.AtlasNotificationBaseMessage.MESSAGE_COMPRESSION_ENABLED;
-import static com.jd.client.AtlasNotificationBaseMessage.MESSAGE_MAX_LENGTH_BYTES;
+import static com.jd.client.model.AtlasNotificationBaseMessage.MESSAGE_COMPRESSION_ENABLED;
+import static com.jd.client.model.AtlasNotificationBaseMessage.MESSAGE_MAX_LENGTH_BYTES;
 
 
 public abstract class AbstractNotification implements NotificationInterface {
@@ -61,7 +59,7 @@ public abstract class AbstractNotification implements NotificationInterface {
         return currentUser;
     }
     public static void createNotificationMessages(Object message, List<String> msgJsonList) {
-       AtlasNotificationMessage<?> notificationMsg = new AtlasNotificationMessage<>(CURRENT_MESSAGE_VERSION, message, getHostAddress(), getCurrentUser());
+       AtlasNotificationMessage<?> notificationMsg = new AtlasNotificationMessage(CURRENT_MESSAGE_VERSION, message, getHostAddress(), getCurrentUser());
         String                      msgJson         = AtlasType.toV1Json(notificationMsg);
 
         boolean msgLengthExceedsLimit = (msgJson.length() * MAX_BYTES_PER_CHAR) > MESSAGE_MAX_LENGTH_BYTES;
@@ -73,12 +71,12 @@ public abstract class AbstractNotification implements NotificationInterface {
 
             if (msgLengthExceedsLimit) {
                 String          msgId           = getNextMessageId();
-                CompressionKind compressionKind = CompressionKind.NONE;
+                AtlasNotificationBaseMessage.CompressionKind compressionKind = AtlasNotificationBaseMessage.CompressionKind.NONE;
 
                 if (MESSAGE_COMPRESSION_ENABLED) {
                     byte[] encodedBytes = AtlasNotificationBaseMessage.gzipCompressAndEncodeBase64(msgBytes);
 
-                    compressionKind = CompressionKind.GZIP;
+                    compressionKind = AtlasNotificationBaseMessage.CompressionKind.GZIP;
 
                     LOG.info("Compressed large message: msgID={}, uncompressed={} bytes, compressed={} bytes", msgId, msgBytes.length, encodedBytes.length);
 

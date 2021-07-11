@@ -1,9 +1,10 @@
 package com.jd.client;
 
 import avro.shaded.com.google.common.annotations.VisibleForTesting;
+import com.jd.client.exception.NotificationException;
+import com.jd.client.model.AbstractNotification;
 import com.jd.commons.NotificationContextHolder;
 import org.apache.atlas.AtlasException;
-import org.apache.atlas.notification.NotificationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.alias.CredentialProvider;
@@ -17,6 +18,7 @@ import java.util.*;
 import java.util.concurrent.Future;
 
 import static org.apache.atlas.security.SecurityProperties.*;
+
 
 public class KafkaNotification extends AbstractNotification {
     public static final Logger LOG = LoggerFactory.getLogger(KafkaNotification.class);

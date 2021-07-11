@@ -108,10 +108,6 @@
           <groupId>org.apache.parquet</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>jackson-databind</artifactId>
-          <groupId>com.fasterxml.jackson.core</groupId>
-        </exclusion>
-        <exclusion>
           <artifactId>arrow-vector</artifactId>
           <groupId>org.apache.arrow</groupId>
         </exclusion>
@@ -164,8 +160,16 @@
           <groupId>org.apache.calcite</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>httpclient</artifactId>
+          <groupId>org.apache.httpcomponents</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>jackson-mapper-asl</artifactId>
           <groupId>org.codehaus.jackson</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-codec</artifactId>
+          <groupId>commons-codec</groupId>
         </exclusion>
         <exclusion>
           <artifactId>joda-time</artifactId>

@@ -1,5 +1,6 @@
-package com.jd.tracker
+package com.jd
 
+import com.jd.commons.AtlasParserInterface
 import org.apache.spark.sql.SparkSessionExtensions
 
 class AtlasSparkSessionExtensions extends (SparkSessionExtensions => Unit) {

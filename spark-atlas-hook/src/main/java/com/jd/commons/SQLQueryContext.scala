@@ -1,4 +1,4 @@
-package com.jd.tracker
+package com.jd.commons
 
 object SQLQueryContext {
   private[this] val sqlQuery = new ThreadLocal[String]

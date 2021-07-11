@@ -1,8 +1,7 @@
-package com.jd.client;
+package com.jd.client.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.apache.atlas.model.notification.MessageVersion;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.compress.utils.IOUtils;

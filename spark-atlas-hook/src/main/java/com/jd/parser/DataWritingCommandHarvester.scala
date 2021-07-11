@@ -1,8 +1,6 @@
 package com.jd.parser
 
 
-import com.jd.client.AtlasClient
-import org.apache.atlas.model.instance.{AtlasEntity, AtlasObjectId, AtlasRelatedObjectId}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.catalog.HiveTableRelation
 import org.apache.spark.sql.catalyst.expressions.{Expression, NamedExpression}
@@ -13,9 +11,10 @@ import org.slf4j.{Logger, LoggerFactory}
 import java.util
 import java.util.Date
 
-import com.jd.commons.NotificationContextHolder
-import com.jd.tracker.SQLQueryContext
+import com.jd.client.AtlasClient
+import com.jd.commons.{NotificationContextHolder, SQLQueryContext}
 import org.apache.atlas.`type`.AtlasTypeUtil
+import org.apache.atlas.model.instance.{AtlasEntity, AtlasObjectId, AtlasRelatedObjectId}
 
 import scala.collection.mutable.{HashMap, ListBuffer}
 

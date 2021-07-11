@@ -1,8 +1,7 @@
 package com.jd.client;
-
+import com.jd.client.exception.NotificationException;
 import org.apache.atlas.AtlasException;
 import org.apache.atlas.model.notification.HookNotification;
-import org.apache.atlas.notification.NotificationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.util.ShutdownHookManager;
@@ -15,23 +14,20 @@ import java.util.List;
 import java.util.Properties;
 
 
-public class AtlasHook {
-    private static final Logger LOG = LoggerFactory.getLogger(AtlasHook.class);
+public class AtlasSparkHook {
+    private static final Logger LOG = LoggerFactory.getLogger(AtlasSparkHook.class);
     protected static Properties props;
     protected static NotificationInterface notificationInterface;
 
-    public AtlasHook(Properties props) throws AtlasException {
+    public AtlasSparkHook(Properties props) throws AtlasException {
         this.props=props;
         notificationInterface=new KafkaNotification(props);
-
         String currentUser = "";
-
         try {
             currentUser = getUser(null,null);
         } catch (Exception excp) {
             LOG.warn("Error in determining current user", excp);
         }
-
         notificationInterface.setCurrentUser(currentUser);
 
         ShutdownHookManager.get().addShutdownHook(new Thread() {

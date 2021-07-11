@@ -4,9 +4,8 @@ import java.io.FileInputStream
 import java.util.Properties
 
 import com.jd.client.AtlasClient
-import com.jd.commons.QueryeExecutionDetail
+import com.jd.commons.SQLQueryContext
 import com.jd.parser.DataWritingCommandHarvester
-import com.jd.tracker.SQLQueryContext
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.execution.datasources.v2.WriteToDataSourceV2Exec
 import org.apache.spark.sql.execution.{LeafExecNode, QueryExecution, SparkPlan, UnionExec}
@@ -16,16 +15,15 @@ import org.apache.spark.sql.hive.execution.{CreateHiveTableAsSelectCommand, Inse
 
 import scala.collection.mutable.Set
 
-class SparkSQLAtlasTracker extends QueryExecutionListener with Logging{
+class AtlasSparkSQLTracker extends QueryExecutionListener with Logging{
   var client:AtlasClient=AtlasClient("spark-hook.properties")
   private val commands:Set[DataWritingCommand]= Set[DataWritingCommand]()
   override def onSuccess(funcName: String, qe: QueryExecution, durationNs: Long): Unit = {
     logInfo("==onSuccess==\t"+Thread.currentThread().getName+"\t"+Thread.currentThread().getId +"\t"+funcName +"\t"+SQLQueryContext.get())
 
     val commandHarvester = new DataWritingCommandHarvester(client)
-    val qed = QueryeExecutionDetail(qe, Option(SQLQueryContext.get()))
     //获取所有的节点计划类型
-    var planNodes: Seq[SparkPlan] = qed.queryExecution.sparkPlan.collect {
+    var planNodes: Seq[SparkPlan] = qe.sparkPlan.collect {
       case p: UnionExec => p.children
       case p: DataWritingCommandExec => Seq(p)
       case p: WriteToDataSourceV2Exec => Seq(p)
@@ -42,7 +40,7 @@ class SparkSQLAtlasTracker extends QueryExecutionListener with Logging{
           commands.add(cmd)
           cmd match {
             case CreateHiveTableAsSelectCommand(tableDesc,query,outputColumnNames,mode)=>{
-              logInfo("=========CreateHiveTableAsSelectCommand================="+cmd)
+              logInfo("=========CreateHiveTableAsSelectCommand=================")
               commandHarvester.harvesterCreateHiveTableAsSelectCommand(cmd.asInstanceOf[CreateHiveTableAsSelectCommand]);
             }
             //处理 Insert Into hive table

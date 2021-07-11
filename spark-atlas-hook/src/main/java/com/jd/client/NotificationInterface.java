@@ -1,6 +1,8 @@
 package com.jd.client;
 
-import org.apache.atlas.notification.NotificationException;
+
+
+import com.jd.client.exception.NotificationException;
 
 import java.util.List;
 
@@ -11,5 +13,4 @@ public interface NotificationInterface {
     void setCurrentUser(String user);
     <T> void send(NotificationInterface.NotificationType type, List<T> messages) throws NotificationException;
     void close();
-
 }

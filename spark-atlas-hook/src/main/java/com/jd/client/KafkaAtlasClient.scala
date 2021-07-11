@@ -4,9 +4,11 @@ import java.util.{Collections, Properties}
 import org.apache.atlas.model.instance.AtlasEntity
 import org.apache.atlas.model.notification.HookNotification
 
-class KafkaAtlasClient(props:Properties) extends AtlasHook(props:Properties) with AtlasClient {
+
+class KafkaAtlasClient(props:Properties) extends AtlasSparkHook(props:Properties) with AtlasClient {
+
   override def publishMessages(ext: AtlasEntity.AtlasEntitiesWithExtInfo): Unit = {
-    val notification = new HookNotification.EntityCreateRequestV2("Spark Hook 1.0", ext)
+    val notification = new HookNotification.EntityCreateRequestV2(AtlasSparkHook.getUser(null,null), ext)
     notifyEntities(Collections.singletonList(notification),null)
    }
 
