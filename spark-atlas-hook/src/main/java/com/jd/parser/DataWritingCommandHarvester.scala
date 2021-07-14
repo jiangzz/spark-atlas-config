@@ -69,7 +69,7 @@ class DataWritingCommandHarvester(client:AtlasClient){
         val expID = elem.exprId.id
         val columnName=s"${database}.${tableName}.${elem.name.toLowerCase}@${namespace}"
         if(tableColumnsMap.contains(expID)){
-          columnLineageEntities+=harvestColumnLineage(database,tableName,namespace,elem.name.toLowerCase,columnName,List(tableColumnsMap.get(expID).get),null,tableProcessEntity)
+          columnLineageEntities+=harvestColumnLineage(database,tableName,namespace,elem.name.toLowerCase,columnName,List(tableColumnsMap.get(expID).get),null,inputTables,tableProcessEntity)
         }else{
           //获取子字段血缘信息
           if(!elem.children.isEmpty){
@@ -86,7 +86,7 @@ class DataWritingCommandHarvester(client:AtlasClient){
             if(listColumns.size==1 && ! (expression.contains("(") && expression.contains(")"))){
               expression=null;
             }
-            columnLineageEntities+=harvestColumnLineage(database,tableName,namespace,elem.name.toLowerCase,columnName,listColumns,expression,tableProcessEntity)
+            columnLineageEntities+=harvestColumnLineage(database,tableName,namespace,elem.name.toLowerCase,columnName,listColumns,expression,inputTables,tableProcessEntity)
           }
         }
       }
@@ -106,7 +106,7 @@ class DataWritingCommandHarvester(client:AtlasClient){
         }
         for (elem <- tableColumnsMap.keySet) {
           columnLineageEntities+=harvestColumnLineage(database, tableName, namespace, elem.toLowerCase,
-            s"${database}.${tableName}.${elem.toLowerCase}@${namespace}", List(tableColumnsMap.get(elem).get),null,tableProcessEntity)
+            s"${database}.${tableName}.${elem.toLowerCase}@${namespace}", List(tableColumnsMap.get(elem).get),null,inputTables,tableProcessEntity)
         }
       })
     }
@@ -161,7 +161,7 @@ class DataWritingCommandHarvester(client:AtlasClient){
         val expID = elem.exprId.id
         val columnName=s"${database}.${tableName}.${elem.name.toLowerCase}@${namespace}"
         if(tableColumnsMap.contains(expID)){
-          columnLineageEntities+=harvestColumnLineage(database,tableName,namespace,elem.name.toLowerCase,columnName,List(tableColumnsMap.get(expID).get),null,tableProcessEntity)
+          columnLineageEntities+=harvestColumnLineage(database,tableName,namespace,elem.name.toLowerCase,columnName,List(tableColumnsMap.get(expID).get),null,inputTables,tableProcessEntity)
         }else{
           //获取子字段血缘信息
           if(!elem.children.isEmpty){
@@ -178,7 +178,7 @@ class DataWritingCommandHarvester(client:AtlasClient){
             if(listColumns.size==1 && ! (expression.contains("(") && expression.contains(")"))){
               expression=null;
             }
-            columnLineageEntities+=harvestColumnLineage(database,tableName,namespace,elem.name.toLowerCase,columnName,listColumns,expression,tableProcessEntity)
+            columnLineageEntities+=harvestColumnLineage(database,tableName,namespace,elem.name.toLowerCase,columnName,listColumns,expression,inputTables,tableProcessEntity)
           }
         }
       }
@@ -198,7 +198,7 @@ class DataWritingCommandHarvester(client:AtlasClient){
         }
         for (elem <- tableColumnsMap.keySet) {
           columnLineageEntities+=harvestColumnLineage(database, tableName, namespace, elem.toLowerCase,
-            s"${database}.${tableName}.${elem.toLowerCase}@${namespace}", List(tableColumnsMap.get(elem).get),null,tableProcessEntity)
+            s"${database}.${tableName}.${elem.toLowerCase}@${namespace}", List(tableColumnsMap.get(elem).get),null,inputTables,tableProcessEntity)
         }
       })
     }
@@ -254,7 +254,7 @@ class DataWritingCommandHarvester(client:AtlasClient){
         val expID = elem.exprId.id
         val columnName=s"${database}.${tableName}.${elem.name.toLowerCase}@${namespace}"
         if(tableColumnsMap.contains(expID)){
-          columnLineageEntities+=harvestColumnLineage(database,tableName,namespace,elem.name.toLowerCase,columnName,List(tableColumnsMap.get(expID).get),null,tableProcessEntity)
+          columnLineageEntities+=harvestColumnLineage(database,tableName,namespace,elem.name.toLowerCase,columnName,List(tableColumnsMap.get(expID).get),null,inputTables,tableProcessEntity)
         }else{
           //获取子字段血缘信息
           if(!elem.children.isEmpty){
@@ -271,7 +271,7 @@ class DataWritingCommandHarvester(client:AtlasClient){
             if(listColumns.size==1 && ! (expression.contains("(") && expression.contains(")"))){
               expression=null;
             }
-            columnLineageEntities+=harvestColumnLineage(database,tableName,namespace,elem.name.toLowerCase,columnName,listColumns,expression,tableProcessEntity)
+            columnLineageEntities+=harvestColumnLineage(database,tableName,namespace,elem.name.toLowerCase,columnName,listColumns,expression,inputTables,tableProcessEntity)
           }
         }
       }
@@ -291,7 +291,7 @@ class DataWritingCommandHarvester(client:AtlasClient){
         }
         for (elem <- tableColumnsMap.keySet) {
           columnLineageEntities+=harvestColumnLineage(database, tableName, namespace, elem.toLowerCase,
-            s"${database}.${tableName}.${elem.toLowerCase}@${namespace}", List(tableColumnsMap.get(elem).get),null,tableProcessEntity)
+            s"${database}.${tableName}.${elem.toLowerCase}@${namespace}", List(tableColumnsMap.get(elem).get),null,inputTables,tableProcessEntity)
         }
       })
     }
@@ -303,7 +303,7 @@ class DataWritingCommandHarvester(client:AtlasClient){
   }
 
   def harvestColumnLineage(database:String,table:String,cluster:String,shortColumn:String,resultColumn:String,
-                           inputColumns:Seq[String], expression:String,hiveProcess:AtlasEntity):AtlasEntity={
+                           inputColumns:Seq[String], expression:String,inputTables:Seq[String],hiveProcess:AtlasEntity):AtlasEntity={
 
     log.info(s"字段血缘 ${resultColumn} - ${expression} -> ${inputColumns.mkString(",")}")
 
@@ -320,7 +320,12 @@ class DataWritingCommandHarvester(client:AtlasClient){
     atlasEntity.setRelationshipAttribute("outputs", outputs)
 
     val qualifiedName=s"${database}.${table}@${cluster}:${shortColumn}"
-    atlasEntity.setAttribute("qualifiedName", qualifiedName)
+    var querySQL = SQLQueryContext.get().toLowerCase()
+    if(querySQL.contains("overwrite")) {
+      atlasEntity.setAttribute("qualifiedName", "QUERY:"+inputTables.sortBy(v => v.substring(v.indexOf(".") + 1, v.indexOf("@"))).reduce(_ + ":" + _)+"->:INSERT_OVERWRITE:"+qualifiedName)
+    } else {
+      atlasEntity.setAttribute("qualifiedName", "QUERY:"+inputTables.sortBy(v => v.substring(v.indexOf(".") + 1, v.indexOf("@"))).reduce(_ + ":" + _)+"->:INSERT:"+qualifiedName)
+    }
     atlasEntity.setAttribute("name", qualifiedName)
     if(expression==null){
       atlasEntity.setAttribute("depenendencyType", "SIMPLE")
@@ -349,12 +354,17 @@ class DataWritingCommandHarvester(client:AtlasClient){
     atlasEntity.setRelationshipAttribute("outputs", outputs)
 
     val qualifiedName=s"${resultTable}"
-    atlasEntity.setAttribute("qualifiedName", qualifiedName)
+    var querySQL = SQLQueryContext.get().toLowerCase()
+    if(querySQL.contains("overwrite")) {
+      atlasEntity.setAttribute("qualifiedName", "QUERY:"+inputTables.sortBy(v => v.substring(v.indexOf(".") + 1, v.indexOf("@"))).reduce(_ + ":" + _)+"->:INSERT_OVERWRITE:"+resultTable)
+    } else {
+      atlasEntity.setAttribute("qualifiedName", "QUERY:"+inputTables.sortBy(v => v.substring(v.indexOf(".") + 1, v.indexOf("@"))).reduce(_ + ":" + _)+"->:INSERT:"+resultTable)
+    }
     atlasEntity.setAttribute("name", qualifiedName)
     atlasEntity.setAttribute("userName", "Spark")
     atlasEntity.setAttribute("startTime", new Date)
     atlasEntity.setAttribute("endTime", new Date)
-    var querySQL = SQLQueryContext.get()
+
     atlasEntity.setAttribute("operationType", operType)
     atlasEntity.setAttribute("queryId", querySQL)
     atlasEntity.setAttribute("queryText", querySQL)
